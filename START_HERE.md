@@ -2,12 +2,17 @@
 
 You do not need to understand the code yet. Do these steps in order; each one tells you what "good" looks like.
 
-## 1. Python side (works right now, nothing to install)
+## 1. Python side
 ```bash
 cd bulwark
+python3 --version          # must be 3.10 or newer (macOS's built-in one is 3.9 = too old)
+brew install python@3.12   # only if the line above said 3.9 or lower
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 make test-py
 ```
-Good = ends with `OK` (about 130 tests, ~25 seconds). Needs Python 3.10+ and `pydantic` (`pip3 install pydantic` if it complains).
+Good = it prints `environment OK` and then ends with `OK` (about 130 tests, ~25 seconds).
+If you see `ENVIRONMENT PROBLEMS`, it tells you the exact fix.
 
 ## 2. See a demo campaign (synthetic - for plumbing only, NOT a finding)
 ```bash
