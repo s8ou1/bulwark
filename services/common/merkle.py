@@ -7,12 +7,15 @@ Empty tree root = 32 zero bytes (the contract treats a zero root as 'nothing all
 """
 from __future__ import annotations
 
+from functools import lru_cache
+
 from .abi import encode_address, normalize_address
 from .keccak import keccak256
 
 EMPTY_ROOT = bytes(32)
 
 
+@lru_cache(maxsize=4096)
 def leaf_for_address(address: str) -> bytes:
     return keccak256(keccak256(encode_address(address)))
 

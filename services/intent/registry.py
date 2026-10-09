@@ -82,7 +82,14 @@ class Registry:
         return [p.address for p in self.recipients.values() if p.status == "active"]
 
     def merkle_tree(self) -> merkle.MerkleTree:
-        return merkle.MerkleTree(self.active_recipient_addresses())
+        # Cached on the exact active-address set, so direct dict edits can never yield a stale tree.
+        key = tuple(sorted(self.active_recipient_addresses()))
+        cached = getattr(self, "_tree_cache", None)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+        tree = merkle.MerkleTree(list(key))
+        self._tree_cache = (key, tree)
+        return tree
 
     def allowlist_root(self) -> bytes:
         return self.merkle_tree().root

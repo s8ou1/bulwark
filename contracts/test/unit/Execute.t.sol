@@ -255,9 +255,8 @@ contract ExecuteTest is Base {
         BulwarkModule rogue = new BulwarkModule(address(safe), guardian, 0);
         // rogue was never enabled via safe.enableModule -> Safe refuses
         vm.prank(address(safe));
-        bytes32 id = rogue.queue(abi.encode(BulwarkModule.Op.SET_TOKEN_LIMIT, abi.encode(address(token), CAP, REFILL, true)));
+        rogue.queue(abi.encode(BulwarkModule.Op.SET_TOKEN_LIMIT, abi.encode(address(token), CAP, REFILL, true)));
         rogue.applyPending(abi.encode(BulwarkModule.Op.SET_TOKEN_LIMIT, abi.encode(address(token), CAP, REFILL, true)));
-        id;
         vm.prank(address(safe));
         rogue.queue(abi.encode(BulwarkModule.Op.SET_ALLOWLIST_ROOT, abi.encode(ROOT3)));
         rogue.applyPending(abi.encode(BulwarkModule.Op.SET_ALLOWLIST_ROOT, abi.encode(ROOT3)));
