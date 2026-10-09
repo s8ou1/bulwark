@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+*.key
+keystore/
+contracts/out/
+contracts/cache/
+contracts/lib/
+node_modules/
+benchmarks/results/*.tmp
+.DS_Store
