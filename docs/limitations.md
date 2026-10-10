@@ -27,3 +27,8 @@
 4. Signer service, Postgres audit log, API, dashboard.
 5. ERC-8004 attestation (verify the current spec first) or the fallback event registry.
 6. ML risk scorer with held-out attack classes.
+
+
+## Differential test (added)
+- `contracts/test/diff/Differential.t.sol` replays 20 x 150 random steps (from `tools/gen_diff_scenarios.py`) on the real contract and compares revert selector + bucket level with the Python PolicyModel. Covers: pause/unpause, session expiry/cooldown, deadlines, replay, Merkle proofs (valid/empty/wrong/tampered/oversized), approvals, allowance reset. Does NOT cover: queue/delay governance, tighten ops, kill, multi-token buckets, fee-on-transfer/hook tokens.
+- Agreement shows the model is a faithful stand-in for these paths; it is not proof of contract correctness (invariants + unit tests carry that).

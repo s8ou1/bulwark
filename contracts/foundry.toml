@@ -8,7 +8,7 @@ solc = "0.8.24"
 evm_version = "cancun"
 optimizer = true
 optimizer_runs = 200
-fs_permissions = [{ access = "read", path = "./deployments" }]
+fs_permissions = [{ access = "read", path = "./deployments" }, { access = "read", path = "./test/diff" }]
 
 [fuzz]
 runs = 512

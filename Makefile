@@ -1,4 +1,4 @@
-.PHONY: doctor setup help test-py test-sol test lint vectors clean
+.PHONY: diff-gen doctor setup help test-py test-sol test lint vectors clean
 doctor:
 	python3 tools/doctor.py
 
@@ -24,3 +24,6 @@ vectors:
 
 clean:
 	rm -rf contracts/out contracts/cache
+
+diff-gen:
+	python3 tools/gen_diff_scenarios.py
