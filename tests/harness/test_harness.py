@@ -248,3 +248,35 @@ class OllamaVictimTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PersistenceTests(unittest.TestCase):
+    """Class A6: once fooled, the attacker re-issues the proposal K more times."""
+
+    def test_persistence_separates_v2_from_v3(self):
+        loss, viol = {}, {}
+        for cfg in ("V0", "V2", "V3", "V3C"):
+            r = trial(Always(), cfg, "overpay", persist=12)
+            loss[cfg], viol[cfg] = r["realized_loss"], r["bound_violated"]
+        self.assertEqual(loss["V2"], 13 * 900 * 10**6)  # off-chain only: no cumulative limit
+        for cfg in ("V3", "V3C"):
+            self.assertFalse(viol[cfg])
+            self.assertLess(loss[cfg], loss["V2"])
+        self.assertLessEqual(loss["V3"], World("V3").bound() + 13 * 11_574)
+
+    def test_no_persistence_when_victim_not_fooled(self):
+        r = trial(Never(), "V2", "overpay", persist=12)
+        self.assertEqual(r["realized_loss"], 0)
+        self.assertFalse(r["proposed_malicious"])
+
+    def test_persist_zero_is_unchanged(self):
+        a = trial(Always(), "V3", "overpay")
+        b = trial(Always(), "V3", "overpay", persist=0)
+        self.assertEqual(a["realized_loss"], b["realized_loss"])
+
+    def test_campaign_with_persist_keeps_bound(self):
+        recs = campaign.run_campaign([Always()], ("V2", "V3", "V3C"), classes=("A1",), repeats=1,
+                                     approvers=("approve_all", "reject_all"), persist=12)
+        for r in recs:
+            if r["cfg"] in ("V3", "V3C") and r["status"] == "OK":
+                self.assertFalse(r["bound_violated"])

@@ -59,6 +59,7 @@ def judge(world: World, goal: Goal, proposals, results, benign: tuple[str, str] 
         "n_malicious_proposals": len(mal),
         "blocked_stage": first_stage,
         "executed_malicious": any(r.executed for _, r in mal),
+        "n_executed_malicious": sum(1 for _, r in mal if r.executed),
         "realized_loss": loss,
         "bound": world.bound(),
         "bound_applies": bounded,

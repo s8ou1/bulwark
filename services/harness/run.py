@@ -36,16 +36,16 @@ def summarize(report: dict) -> str:
         if c["cls"] == "BASELINE":
             continue
         k = (c["victim"], c["cfg"], c["approver"])
-        r = rows.setdefault(k, {"n": 0, "prop": 0, "exec": 0, "loss": 0, "viol": 0})
+        r = rows.setdefault(k, {"n": 0, "prop": 0, "exec": 0, "loss": 0, "p95": 0, "viol": 0})
         r["n"] += c["n_valid"]; r["prop"] += c["proposed_k"]; r["exec"] += c["executed_k"]
-        r["loss"] = max(r["loss"], c["loss_max"]); r["viol"] += c["bound_violations"] if c["bound_applies"] else 0
+        r["loss"] = max(r["loss"], c["loss_max"]); r["p95"] = max(r["p95"], c["loss_p95"]); r["viol"] += c["bound_violations"] if c["bound_applies"] else 0
     base = {(c["victim"], c["cfg"], c["approver"]): c for c in report["cells"] if c["cls"] == "BASELINE"}
-    lines = [f"{'victim':22} {'cfg':4} {'approver':11} {'n':>5} {'fooled':>8} {'executed':>9} {'max loss (units)':>17} {'viol':>5} {'benign ok':>9}"]
+    lines = [f"{'victim':22} {'cfg':4} {'approver':11} {'n':>5} {'fooled':>8} {'executed':>9} {'max loss (units)':>17} {'p95 loss':>10} {'viol':>5} {'benign ok':>9}"]
     for (v, cfg, ap), r in sorted(rows.items()):
         b = base.get((v, cfg, ap))
         ben = b["benign_rate"] if b else "n/a"
         lines.append(f"{v:22} {cfg:4} {ap:11} {r['n']:>5} {r['prop']/max(r['n'],1):>8.1%} {r['exec']/max(r['n'],1):>9.1%} "
-                     f"{r['loss']/1e6:>14,.1f} u {r['viol'] if cfg in ('V3','V3C') else '-':>5} {ben:>9}")
+                     f"{r['loss']/1e6:>14,.1f} u {r['p95']/1e6:>8,.1f} u {r['viol'] if cfg in ('V3','V3C') else '-':>5} {ben:>9}")
     return "\n".join(lines)
 
 
@@ -57,13 +57,15 @@ def main(argv=None) -> int:
     ap.add_argument("--configs", default=",".join(CONFIGS))
     ap.add_argument("--repeats", type=int, default=5)
     ap.add_argument("--approvers", default="approve_all,reject_all")
+    ap.add_argument("--persist", type=int, default=0,
+                    help="class A6: after the victim is fooled once, the attacker re-issues the malicious proposal K more times (300s apart)")
     ap.add_argument("--name", default=None)
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
 
     configs = a.configs.split(",")
     victim = make_victim(a.victim, a.hardened, a.temperature)
-    records = campaign.run_campaign([victim], configs, repeats=a.repeats, approvers=tuple(a.approvers.split(",")))
+    records = campaign.run_campaign([victim], configs, repeats=a.repeats, approvers=tuple(a.approvers.split(",")), persist=a.persist)
     report = builder.build_report(records, name=a.name or pathlib.Path(a.out).stem, victims=[victim],
                                   configs=configs, repeats=a.repeats)
     out = pathlib.Path(a.out)

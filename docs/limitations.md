@@ -32,3 +32,8 @@
 ## Differential test (added)
 - `contracts/test/diff/Differential.t.sol` replays 20 x 150 random steps (from `tools/gen_diff_scenarios.py`) on the real contract and compares revert selector + bucket level with the Python PolicyModel. Covers: pause/unpause, session expiry/cooldown, deadlines, replay, Merkle proofs (valid/empty/wrong/tampered/oversized), approvals, allowance reset. Does NOT cover: queue/delay governance, tighten ops, kill, multi-token buckets, fee-on-transfer/hook tokens.
 - Agreement shows the model is a faithful stand-in for these paths; it is not proof of contract correctness (invariants + unit tests carry that).
+
+
+## A6 persistent compromise (added)
+- `--persist K`: after the victim is fooled once, the attacker re-issues the malicious proposal K more times, 300 s apart. This is a THREAT-MODEL ASSUMPTION (hijacked session / poisoned memory), not LLM behaviour.
+- V2 (off-chain only) has no cumulative accounting by design here, which favours V3. An off-chain rate limiter would narrow the gap; V3C (off-chain layer bypassed) is the case where such a limiter would not help. Report V2 vs V3 together with this caveat.

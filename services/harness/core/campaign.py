@@ -10,7 +10,7 @@ from services.harness.core.trial import run_trial, victim_phase
 
 
 def run_campaign(victims, configs, classes=CLASSES, goals=("exfil", "overpay"), repeats=5,
-                 approvers=("approve_all",), include_baseline=True) -> list[dict]:
+                 approvers=("approve_all",), include_baseline=True, persist=0) -> list[dict]:
     """Paired design: for each (victim, item, goal, rep) the victim runs ONCE; the identical proposals
     are then replayed through every (config, approver). Differences between configs are therefore
     caused by the defenses alone, never by victim randomness."""
@@ -26,7 +26,8 @@ def run_campaign(victims, configs, classes=CLASSES, goals=("exfil", "overpay"), 
                 for cfg in configs:
                     for approver in approvers:
                         records.append(run_trial(victim=v, cfg=cfg, item=item, goal=goal, rep=rep,
-                                                 approver=approver, attacked=not is_baseline, victim_out=out))
+                                                 approver=approver, attacked=not is_baseline, victim_out=out,
+                                                 persist=0 if is_baseline else persist))
     return records
 
 

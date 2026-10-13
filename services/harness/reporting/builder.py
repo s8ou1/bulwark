@@ -32,6 +32,7 @@ def build_report(records: list[dict], *, name: str, victims: list, configs: list
         "victim_kinds": kinds,
         "configs": sorted(configs),
         "repeats": repeats,
+        "persist": max((r.get("persist", 0) for r in records), default=0),
         "total_trials": len(records),
         "error_trials": sum(1 for r in records if r["status"] != "OK"),
         "bound_violations_total": violations,
